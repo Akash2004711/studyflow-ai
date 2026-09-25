@@ -90,8 +90,8 @@ export async function generateStudyMaterialFromAI(userInput) {
   const genAI = new GoogleGenerativeAI(apiKey.trim());
   const prompt = `${SYSTEM_PROMPT}\n\nUSER STUDY INPUT / TOPIC:\n${userInput}`;
 
-  // Priority list of Gemini models active on current API tiers & environments
-  const CANDIDATE_MODELS = [
+  // Models in priority order (active, fast, and reliable)
+  const models = [
     'gemini-flash-lite-latest',
     'gemini-3.5-flash-lite',
     'gemini-3.8-flash',
@@ -105,75 +105,37 @@ export async function generateStudyMaterialFromAI(userInput) {
   let rawResponseText = '';
   let lastError = null;
 
-  for (const modelName of CANDIDATE_MODELS) {
-    let attempts = 0;
-    const maxAttempts = 2;
+  // Try available models until one succeeds
+  for (const modelName of models) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.3,
+        },
+      });
 
-    while (attempts < maxAttempts) {
-      attempts++;
-      try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.3,
-          },
-        });
-
-        console.log(`[aiService] Attempting model: ${modelName} (attempt ${attempts})`);
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        rawResponseText = response.text();
-        if (rawResponseText) {
-          console.log(`[aiService] Successfully received response from ${modelName}`);
-          break;
-        }
-      } catch (err) {
-        console.log(`[aiService] Model ${modelName} (attempt ${attempts}) error: ${err.message}`);
-        lastError = err;
-
-        // If 503 (demand spike), wait 1 second and retry once on same model before moving on
-        if ((err.status === 503 || err.message?.includes('503') || err.message?.includes('demand')) && attempts < maxAttempts) {
-          await new Promise((r) => setTimeout(r, 1200));
-          continue;
-        }
-
-        // If 404 (model not found on key/tier), skip immediately to next model
-        if (err.status === 404 || err.message?.includes('404') || err.message?.includes('not found')) {
-          break;
-        }
-
-        // For auth errors (401/403), stop immediately
-        if (err.status === 401 || err.status === 403) {
-          break;
-        }
-
+      const result = await model.generateContent(prompt);
+      rawResponseText = result.response.text();
+      if (rawResponseText) break;
+    } catch (err) {
+      lastError = err;
+      // If 401 or 403 (invalid API key), stop immediately
+      if (err.status === 401 || err.status === 403) {
         break;
       }
     }
-
-    if (rawResponseText) break;
   }
 
+  // Handle failure if no model produced text
   if (!rawResponseText) {
-    console.error('[aiService] Gemini API call failed across models:', lastError?.message);
-
-    if (lastError?.status === 429 || lastError?.message?.includes('429') || lastError?.message?.includes('quota')) {
-      throw new AppError(
-        'AI rate limit or quota exceeded. Please wait a moment and try again.',
-        429,
-        ErrorCodes.RATE_LIMIT_EXCEEDED
-      );
+    if (lastError?.status === 401 || lastError?.status === 403) {
+      throw new AppError('Invalid or unauthorized Gemini API key.', 401, ErrorCodes.AI_SERVICE_UNAVAILABLE);
     }
-
-    if (lastError?.status === 401 || lastError?.status === 403 || lastError?.message?.includes('API key')) {
-      throw new AppError(
-        'Invalid or unauthorized Gemini API key.',
-        401,
-        ErrorCodes.AI_SERVICE_UNAVAILABLE
-      );
+    if (lastError?.status === 429) {
+      throw new AppError('AI rate limit reached. Please wait a moment and try again.', 429, ErrorCodes.RATE_LIMIT_EXCEEDED);
     }
-
     throw new AppError(
       `Failed to communicate with AI service: ${lastError?.message || 'No response from model'}`,
       502,
