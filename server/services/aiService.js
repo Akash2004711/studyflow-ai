@@ -90,15 +90,16 @@ export async function generateStudyMaterialFromAI(userInput) {
   const genAI = new GoogleGenerativeAI(apiKey.trim());
   const prompt = `${SYSTEM_PROMPT}\n\nUSER STUDY INPUT / TOPIC:\n${userInput}`;
 
-  // Priority list of Gemini models to support different API key tiers & environments
+  // Priority list of Gemini models active on current API tiers & environments
   const CANDIDATE_MODELS = [
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash-lite',
     'gemini-3.8-flash',
     'gemini-3.7-flash',
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-latest',
-    'gemini-1.5-pro',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-flash-latest',
+    'gemini-pro-latest',
   ];
 
   let rawResponseText = '';
