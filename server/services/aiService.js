@@ -88,28 +88,76 @@ export async function generateStudyMaterialFromAI(userInput) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey.trim());
-
-  // Attempt using gemini-1.5-flash with structured JSON response config
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    generationConfig: {
-      responseMimeType: 'application/json',
-      temperature: 0.3,
-    },
-  });
-
   const prompt = `${SYSTEM_PROMPT}\n\nUSER STUDY INPUT / TOPIC:\n${userInput}`;
 
+  // Priority list of Gemini models to support different API key tiers & environments
+  const CANDIDATE_MODELS = [
+    'gemini-3.8-flash',
+    'gemini-3.7-flash',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-pro',
+  ];
+
   let rawResponseText = '';
+  let lastError = null;
 
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    rawResponseText = response.text();
-  } catch (apiErr) {
-    console.error('[aiService] Gemini API call failed:', apiErr.message);
+  for (const modelName of CANDIDATE_MODELS) {
+    let attempts = 0;
+    const maxAttempts = 2;
 
-    if (apiErr.status === 429 || apiErr.message?.includes('429') || apiErr.message?.includes('quota')) {
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.3,
+          },
+        });
+
+        console.log(`[aiService] Attempting model: ${modelName} (attempt ${attempts})`);
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        rawResponseText = response.text();
+        if (rawResponseText) {
+          console.log(`[aiService] Successfully received response from ${modelName}`);
+          break;
+        }
+      } catch (err) {
+        console.log(`[aiService] Model ${modelName} (attempt ${attempts}) error: ${err.message}`);
+        lastError = err;
+
+        // If 503 (demand spike), wait 1 second and retry once on same model before moving on
+        if ((err.status === 503 || err.message?.includes('503') || err.message?.includes('demand')) && attempts < maxAttempts) {
+          await new Promise((r) => setTimeout(r, 1200));
+          continue;
+        }
+
+        // If 404 (model not found on key/tier), skip immediately to next model
+        if (err.status === 404 || err.message?.includes('404') || err.message?.includes('not found')) {
+          break;
+        }
+
+        // For auth errors (401/403), stop immediately
+        if (err.status === 401 || err.status === 403) {
+          break;
+        }
+
+        break;
+      }
+    }
+
+    if (rawResponseText) break;
+  }
+
+  if (!rawResponseText) {
+    console.error('[aiService] Gemini API call failed across models:', lastError?.message);
+
+    if (lastError?.status === 429 || lastError?.message?.includes('429') || lastError?.message?.includes('quota')) {
       throw new AppError(
         'AI rate limit or quota exceeded. Please wait a moment and try again.',
         429,
@@ -117,7 +165,7 @@ export async function generateStudyMaterialFromAI(userInput) {
       );
     }
 
-    if (apiErr.status === 401 || apiErr.status === 403 || apiErr.message?.includes('API key')) {
+    if (lastError?.status === 401 || lastError?.status === 403 || lastError?.message?.includes('API key')) {
       throw new AppError(
         'Invalid or unauthorized Gemini API key.',
         401,
@@ -126,7 +174,7 @@ export async function generateStudyMaterialFromAI(userInput) {
     }
 
     throw new AppError(
-      `Failed to communicate with AI service: ${apiErr.message}`,
+      `Failed to communicate with AI service: ${lastError?.message || 'No response from model'}`,
       502,
       ErrorCodes.AI_SERVICE_UNAVAILABLE
     );
