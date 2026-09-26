@@ -76,48 +76,7 @@ const sanitizeJsonResponse = (rawText) => {
  * @param {string} userInput
  * @returns {Promise<import('../schemas/studySchema.js').StudyMaterial>}
  */
-export async function generateStudyMaterialFromAI(userInput, options = {}) {
-  const {
-    difficulty = 'intermediate',
-    flashcardCount = 5,
-    quizCount = 5,
-    testScenario = 'normal',
-  } = options;
-
-  // Development AI failure simulation handling
-  if (process.env.NODE_ENV !== 'production' && testScenario && testScenario !== 'normal') {
-    if (testScenario === 'slow') {
-      await new Promise((resolve) => setTimeout(resolve, 6000));
-    } else if (testScenario === 'malformed-json') {
-      throw new AppError(
-        'The AI returned an unparseable response. Please try again.',
-        502,
-        ErrorCodes.AI_RESPONSE_MALFORMED,
-        { rawSnippet: '{"topic":"JavaScript","summary":"Broken response"' }
-      );
-    } else if (testScenario === 'invalid-schema') {
-      throw new AppError(
-        'The AI response did not match the required structured study format.',
-        502,
-        ErrorCodes.AI_RESPONSE_INVALID,
-        [{ path: 'flashcards', message: 'Expected array, received string' }]
-      );
-    } else if (testScenario === 'empty') {
-      throw new AppError(
-        'The AI returned an empty response. Please try again.',
-        502,
-        ErrorCodes.AI_RESPONSE_MALFORMED,
-        { rawSnippet: '' }
-      );
-    } else if (testScenario === 'server-error') {
-      throw new AppError(
-        'Simulated internal server error during study generation.',
-        500,
-        ErrorCodes.INTERNAL_ERROR
-      );
-    }
-  }
-
+export async function generateStudyMaterialFromAI(userInput) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === '' || apiKey === 'your_gemini_api_key_here') {
@@ -128,38 +87,14 @@ export async function generateStudyMaterialFromAI(userInput, options = {}) {
     );
   }
 
-  const difficultyInstructions = {
-    beginner: 'Use simple definitions, basic foundational concepts, and clear, easy questions.',
-    intermediate: 'Focus on core conceptual understanding, practical examples, and moderate-level questions.',
-    advanced: 'Cover deep conceptual edge cases, nuanced application scenarios, and challenging distractors.',
-  };
-
-  const dynamicPrompt = `Create a study learning session based on the following input.
-
-Difficulty Level: ${difficulty} (${difficultyInstructions[difficulty] || difficultyInstructions.intermediate})
-
-Generate:
-- EXACTLY ${flashcardCount} flashcards (id: "card-1" through "card-${flashcardCount}")
-- EXACTLY ${quizCount} multiple-choice quiz questions (id: "question-1" through "question-${quizCount}")
-
-Return ONLY valid JSON matching the required schema.
-Do not return markdown.
-Do not return explanations outside the JSON.
-Do not wrap the JSON inside \`\`\`json fences.
-
-USER STUDY INPUT / TOPIC:
-${userInput}`;
-
   const genAI = new GoogleGenerativeAI(apiKey.trim());
+  const prompt = `${SYSTEM_PROMPT}\n\nUSER STUDY INPUT / TOPIC:\n${userInput}`;
 
   // Models in priority order (active, fast, and reliable)
   const models = [
-    'gemini-flash-lite-latest',
-    'gemini-3.5-flash-lite',
-    'gemini-3.8-flash',
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+    'gemini-2.0-flash',
     'gemini-flash-latest',
     'gemini-pro-latest',
   ];
@@ -178,7 +113,7 @@ ${userInput}`;
         },
       });
 
-      const result = await model.generateContent(dynamicPrompt);
+      const result = await model.generateContent(prompt);
       rawResponseText = result.response.text();
       if (rawResponseText) break;
     } catch (err) {

@@ -19,15 +19,10 @@ router.post('/generate', async (req, res) => {
       throw new AppError(errorMsg, 400, ErrorCodes.INVALID_INPUT);
     }
 
-    const { input, difficulty, flashcardCount, quizCount, testScenario } = inputValidation.data;
+    const { input } = inputValidation.data;
 
     // 2. Call AI service which performs LLM query, sanitization, and schema validation
-    const studyMaterial = await generateStudyMaterialFromAI(input, {
-      difficulty,
-      flashcardCount,
-      quizCount,
-      testScenario,
-    });
+    const studyMaterial = await generateStudyMaterialFromAI(input);
 
     // 3. Return validated response
     return res.status(200).json({

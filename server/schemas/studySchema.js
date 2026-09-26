@@ -12,26 +12,6 @@ export const studyInputSchema = z.object({
     .trim()
     .min(2, { message: 'Input must be at least 2 characters long.' })
     .max(5000, { message: 'Input cannot exceed 5000 characters.' }),
-  difficulty: z
-    .enum(['beginner', 'intermediate', 'advanced'], {
-      invalid_type_error: 'Difficulty must be beginner, intermediate, or advanced.',
-    })
-    .default('intermediate'),
-  flashcardCount: z
-    .number({ invalid_type_error: 'Flashcard count must be a number.' })
-    .int('Flashcard count must be an integer.')
-    .min(1, 'Flashcard count must be at least 1.')
-    .max(10, 'Flashcard count must be at most 10.')
-    .default(5),
-  quizCount: z
-    .number({ invalid_type_error: 'Quiz count must be a number.' })
-    .int('Quiz count must be an integer.')
-    .min(1, 'Quiz count must be at least 1.')
-    .max(10, 'Quiz count must be at most 10.')
-    .default(5),
-  testScenario: z
-    .enum(['normal', 'malformed-json', 'invalid-schema', 'empty', 'slow', 'server-error'])
-    .optional(),
 });
 
 /**

@@ -124,33 +124,4 @@ describe('Study Schema & AI Output Validation Suite', () => {
     const validTest = studyInputSchema.safeParse({ input: 'Explain React state' });
     assert.equal(validTest.success, true);
   });
-
-  it('Input validation: Invalid difficulty is rejected', () => {
-    const invalidDiff = studyInputSchema.safeParse({
-      input: 'Explain closures',
-      difficulty: 'super-hard',
-    });
-    assert.equal(invalidDiff.success, false);
-
-    const validDiff = studyInputSchema.safeParse({
-      input: 'Explain closures',
-      difficulty: 'advanced',
-    });
-    assert.equal(validDiff.success, true);
-  });
-
-  it('Input validation: Invalid count (out of 1-10 range) is rejected', () => {
-    const invalidCount = studyInputSchema.safeParse({
-      input: 'Explain closures',
-      flashcardCount: 20,
-    });
-    assert.equal(invalidCount.success, false);
-
-    const validCount = studyInputSchema.safeParse({
-      input: 'Explain closures',
-      flashcardCount: 7,
-      quizCount: 3,
-    });
-    assert.equal(validCount.success, true);
-  });
 });

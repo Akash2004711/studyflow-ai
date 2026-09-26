@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, ArrowRight, Check } from 'lucide-react';
+import { CheckCircle, XCircle, ArrowRight, Check, Sparkles } from 'lucide-react';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
 /**
  * QuizQuestion Component
- * Renders an individual multiple choice question with 4 options, selection validation,
- * instant educational feedback, and next-step transition.
+ * Renders an individual MCQ option list with option lift micro-interactions, selection indicators,
+ * and expandable educational explanation feedback after submission.
  */
 export default function QuizQuestion({
   questionData,
@@ -107,25 +107,29 @@ export default function QuizQuestion({
         </p>
       )}
 
-      {/* Immediate post-submission feedback */}
+      {/* Immediate post-submission expanding explanation banner */}
       {isSubmitted && (
         <div className={`feedback-banner ${isCorrect ? 'correct' : 'incorrect'}`} role="alert">
           <div className="feedback-status">
             {isCorrect ? (
               <>
                 <CheckCircle size={18} />
-                <span>Correct!</span>
+                <span>✓ Correct!</span>
               </>
             ) : (
               <>
                 <XCircle size={18} />
-                <span>Incorrect</span>
+                <span>✕ Incorrect</span>
               </>
             )}
           </div>
-          <p className="feedback-explanation">
-            <strong>Explanation:</strong> {questionData.explanation}
-          </p>
+          <div className="feedback-explanation">
+            <span className="explanation-label">
+              <Sparkles size={13} style={{ display: 'inline', marginRight: 4 }} />
+              <strong>Why?</strong>
+            </span>{' '}
+            {questionData.explanation}
+          </div>
         </div>
       )}
 
@@ -140,7 +144,7 @@ export default function QuizQuestion({
             <span>Submit Answer</span>
           </button>
         ) : (
-          <button type="button" className="btn-primary" onClick={handleAdvance}>
+          <button type="button" className="btn-primary btn-cta-3d" onClick={handleAdvance}>
             <span>{isLastQuestion ? 'View Results' : 'Next Question'}</span>
             <ArrowRight size={16} />
           </button>
@@ -149,3 +153,4 @@ export default function QuizQuestion({
     </div>
   );
 }
+

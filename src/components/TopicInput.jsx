@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
-import StudyConfig from './StudyConfig.jsx';
 
 const SUGGESTIONS = [
   'JavaScript Closures for beginners',
@@ -13,26 +12,48 @@ const MAX_CHAR_LIMIT = 5000;
 
 /**
  * TopicInput Component
- * Allows free-form study input, validates client-side limits, and triggers generation.
+ * Large premium 3D input card with character counter, focus glow, 3D mouse tilt, and smooth CTA.
  */
-export default function TopicInput({
-  onGenerate,
-  isLoading,
-  difficulty,
-  onDifficultyChange,
-  flashcardCount,
-  onFlashcardCountChange,
-  quizCount,
-  onQuizCountChange,
-}) {
+export default function TopicInput({ onGenerate, isLoading }) {
   const [input, setInput] = useState('');
   const [validationError, setValidationError] = useState('');
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const handleMouseMove = (e) => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = ((y - centerY) / centerY) * -4;
+      const rotateY = ((x - centerX) / centerX) * 4;
+
+      setTilt({ x: rotateX.toFixed(2), y: rotateY.toFixed(2) });
+    };
+
+    const handleMouseLeave = () => {
+      setTilt({ x: 0, y: 0 });
+    };
+
+    card.addEventListener('mousemove', handleMouseMove);
+    card.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      card.removeEventListener('mousemove', handleMouseMove);
+      card.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
 
-    // Clear validation error if user fixes input
     if (validationError && value.trim().length > 0) {
       setValidationError('');
     }
@@ -72,13 +93,20 @@ export default function TopicInput({
   const isOverLimit = charCount > MAX_CHAR_LIMIT;
 
   return (
-    <section className="input-card" aria-labelledby="input-heading">
+    <section
+      ref={cardRef}
+      className="input-card 3d-tilt-card"
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+      }}
+      aria-labelledby="input-heading"
+    >
       <div className="input-header">
         <h2 id="input-heading" className="input-title">
-          What would you like to master today?
+          What do you want to learn today?
         </h2>
         <p className="input-subtitle">
-          Enter any topic, paste lecture notes, or ask a question to generate instant flashcards & quizzes.
+          Paste your study notes, concepts, or topic to generate interactive flashcards & quiz questions.
         </p>
       </div>
 
@@ -90,7 +118,7 @@ export default function TopicInput({
           <textarea
             id="study-topic-input"
             className="study-textarea"
-            placeholder="Example: Explain JavaScript closures for a beginner..."
+            placeholder="Paste notes, concepts, or topic prompt (e.g. JavaScript closures...)"
             value={input}
             onChange={handleInputChange}
             disabled={isLoading}
@@ -107,7 +135,7 @@ export default function TopicInput({
                 isOverLimit ? 'limit-exceeded' : isNearLimit ? 'limit-near' : ''
               }`}
             >
-              {charCount} / {MAX_CHAR_LIMIT}
+              {charCount} / {MAX_CHAR_LIMIT} characters
             </span>
           </div>
 
@@ -118,17 +146,6 @@ export default function TopicInput({
             </div>
           )}
         </div>
-
-        {/* Study Configuration Panel */}
-        <StudyConfig
-          difficulty={difficulty}
-          onDifficultyChange={onDifficultyChange}
-          flashcardCount={flashcardCount}
-          onFlashcardCountChange={onFlashcardCountChange}
-          quizCount={quizCount}
-          onQuizCountChange={onQuizCountChange}
-          disabled={isLoading}
-        />
 
         <div className="suggestion-chips-wrapper">
           <div className="suggestion-label">Quick Ideas</div>
@@ -150,19 +167,19 @@ export default function TopicInput({
         <div className="generate-action-row">
           <button
             type="submit"
-            className="btn-primary"
+            className="btn-primary btn-cta-3d"
             disabled={isLoading || isOverLimit}
             aria-busy={isLoading}
           >
             {isLoading ? (
               <>
                 <RefreshCw size={18} className="spinner-pulse" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                <span>Generating...</span>
+                <span>Generating your study experience...</span>
               </>
             ) : (
               <>
                 <Sparkles size={18} />
-                <span>Generate Study Session</span>
+                <span>✦ Generate Study Session</span>
               </>
             )}
           </button>
@@ -171,3 +188,4 @@ export default function TopicInput({
     </section>
   );
 }
+
