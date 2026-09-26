@@ -1,282 +1,130 @@
 # StudyFlow AI
 
-An AI-powered interactive study assistant built with React, Vite, Node.js, Express, Gemini, and Zod. StudyFlow AI turns free-form topics, notes, or questions into structured study materials—featuring concise summaries, interactive flip flashcards, multiple-choice quizzes, and targeted review for incorrect questions.
+An AI-powered interactive study assistant built with React, Vite, Node.js, Express, Gemini, and Zod. StudyFlow AI turns free-form topics, notes, or questions into structured study materials—featuring customizable session configurations, concise summaries, interactive flip flashcards, multiple-choice quizzes, targeted review for incorrect questions, and a developer reliability test mode.
+
+---
+
+## Reliability & Error Handling
+
+Handling unpredictable AI responses and network failures reliably is a core design principle of StudyFlow AI:
+
+1. **Structured AI Responses**: Enforces strict JSON generation from Gemini without Markdown blocks, conversational filler, or unparsed text.
+2. **Dual-Layer Zod Validation**: All AI responses are treated as untrusted data and validated against strict Zod schemas on both the backend service and the client before updating state.
+3. **Malformed JSON Handling**: Intercepts unparseable or truncated LLM output, preventing JSON parse crashes and giving users a clean error alert with Retry capability.
+4. **Schema Validation**: Catches response shape mismatches (e.g. string instead of array, missing fields, option counts other than 4, invalid index) and returns actionable `SCHEMA_ERROR` notices.
+5. **Empty Response Handling**: Guards against blank or null AI outputs, cleanly rendering a friendly message without showing `undefined` or broken UI components.
+6. **Timeout Handling**: Uses native `AbortController` timeouts (15 seconds) to abort stalled backend requests and clear loading spinners cleanly.
+7. **Request Cancellation**: Automatically aborts active in-flight requests when a user starts a new session generation.
+8. **Stale Response Protection**: Uses request sequence checking (`requestIdRef`) to guarantee older network responses can never overwrite newer user results.
+9. **Controlled Retry Behavior**: Allows explicit, 1-click manual retries using identical topic and configuration inputs without endless automated retry loops.
+10. **Development Failure Simulation**: Provides a DEV-only Reliability Test panel (`import.meta.env.DEV`) to simulate failure modes (`malformed-json`, `invalid-schema`, `empty`, `slow`, `server-error`).
+11. **Server-Side API Key Security**: Isolates the `GEMINI_API_KEY` on the backend proxy server to prevent secret leaks in browser client bundles.
 
 ---
 
 ## Architecture & Data Flow
 
 ```text
-User Input (Topic / Notes)
-          │
-          ▼
-┌──────────────────┐
-│   React Client   │  ← Client-side input validation & AbortController protection
-└─────────┬────────┘
-          │ POST /api/study/generate
-          ▼
-┌──────────────────┐
-│  Express Server  │  ← Zod request payload validation
-└─────────┬────────┘
-          │ Structured Prompt & JSON enforcement
-          ▼
-┌──────────────────┐
-│    Gemini LLM    │  ← Generates structured JSON (No conversational markdown)
-└─────────┬────────┘
-          │ Raw JSON response
-          ▼
-┌──────────────────┐
-│ Backend Service  │  ← JSON sanitization & Zod Schema Validation
-└─────────┬────────┘
-          │ Validated Payload
-          ▼
-┌──────────────────┐
-│   React Client   │  ← Defense-in-depth Zod validation & UI state rendering
-└──────────────────┘
+User Input & Config (Topic, Difficulty, Card Count, Quiz Count)
+ │
+ ▼
+React UI (Client-Side Validation & AbortController Protection)
+ │
+ │ POST /api/study/generate
+ ▼
+Express Backend (Request Validation via Zod)
+ │
+ │ Dynamic Structured Prompt
+ ▼
+AI Provider (Gemini LLM)
+ │
+ │ Structured JSON Output
+ ▼
+JSON Parsing & Sanitization
+ │
+ │ Zod Response Validation
+ ├── Invalid → Error State + Friendly Alert
+ │
+ ▼
+React State ('idle' | 'loading' | 'success' | 'error')
+ │
+ ├── Summary (Copyable)
+ ├── Flashcards (Difficulty-aware)
+ └── Quiz (Interactive + Retry Wrong Answers)
 ```
+
+```text
+State Transitions:
+idle ──► loading ──► success
+            │
+            └──► error ──► retry
+```
+
+---
+
+## Interview Demo
+
+To demonstrate StudyFlow AI's reliability during an interview:
+
+1. **Generate a Normal Study Session**: Enter a topic (e.g. "JavaScript Closures"), choose a difficulty level (e.g. "Intermediate"), choose card/quiz counts (e.g. 5), and click **Generate Study Session**.
+2. **Open Developer Test Mode**: Notice the **Developer AI Reliability Test Mode** box at the top (visible in development mode).
+3. **Trigger Malformed JSON**: Select `Malformed JSON` from the dropdown and click `Test Scenario`.
+4. **Show Error State**: Observe that the app does not crash, displays a friendly "The AI returned an unparseable response" message, and presents a **Try Again** (Retry) button.
+5. **Click Retry**: Click **Try Again** to recover and re-run generation.
+6. **Trigger Slow Response & Timeout**: Select `Slow Response` or simulate network delay; verify that the loading state is displayed clearly with feedback and timeouts abort cleanly after 15 seconds.
+7. **Demonstrate Stale Response Protection**: Fire a request for "JavaScript", then immediately fire a request for "Python". Verify that only the final "Python" request updates the UI.
+8. **Test Session Regeneration & Data Preservation**: Click **Regenerate Session**. Trigger a simulated error during regeneration and show that the original successful study session remains visible alongside the error notice.
 
 ---
 
 ## Key Features
 
-- **Free-Form Study Input**: Accepts custom topics, questions, paragraphs, or lecture notes with character counting, validation feedback, and quick suggestions.
-- **Structured AI Output**: Strictly enforces JSON schema output from Gemini (no raw AI text or unparsed markdown dumped into UI).
-- **Dual-Layer Schema Validation**: Treats all AI outputs as untrusted data. Validates using Zod on both the backend service and the client before state updates.
-- **Interactive Flashcards**:
-  - Flip / reveal answer mechanism
-  - Card-by-card navigation with boundary protection (Previous / Next)
-  - Animated progress bar and card counters
-- **Knowledge Check Quiz**:
-  - 5 multiple-choice questions (4 options each)
-  - Single selection validation (cannot submit without selection)
-  - Immediate visual feedback (correct/incorrect) with educational explanations
-- **Comprehensive Score Screen**:
-  - Score circle displaying score fraction and percentage
-  - Categorized feedback based on performance
-  - Question-by-question review showing user choice, correct choice, and rationale
-- **Retry Wrong Answers**:
-  - Automatically isolates questions answered incorrectly
-  - Launches a focused quiz session containing only the missed questions
-  - Displays a perfect-score message when all questions are mastered
-- **Robust Failure & State Handling**:
-  - Loading skeleton state with progress indicators
-  - Empty onboarding state
-  - Dedicated error boundary state with clean retry action
-  - Handles malformed JSON, schema mismatch, missing fields, rate limits, and network drops
-- **Stale Request & Race-Condition Prevention**: Uses React `useRef` with native `AbortController` to cancel in-flight requests when a new generation is initiated.
-- **Secure Backend Proxy**: The Gemini API key is isolated strictly in server-side environment variables and never exposed to browser client code.
-- **Responsive & Accessible**: Responsive layout optimized for 320px to 1440px+ displays with semantic HTML and ARIA attributes.
-
----
-
-## Tech Stack
-
-- **Frontend**: React 18, Vite 6, Vanilla CSS (Custom Design System with CSS variables), Lucide Icons, Zod
-- **Backend**: Node.js, Express 4, CORS, Dotenv, Zod, `@google/generative-ai`
-- **Testing**: Node.js native test runner (`node:test`, `node:assert`)
-
----
-
-## Project Structure
-
-```text
-studyflow-ai/
-│
-├── src/
-│   ├── components/
-│   │   ├── Header.jsx           # App branding & AI status badge
-│   │   ├── TopicInput.jsx       # Textarea input, validation & quick ideas
-│   │   ├── EmptyState.jsx       # Initial onboarding screen
-│   │   ├── LoadingState.jsx     # Animated generation progress state
-│   │   ├── ErrorState.jsx       # Error card with retry action
-│   │   ├── StudySummary.jsx     # Verified topic & summary card
-│   │   ├── FlashcardSection.jsx # Flashcard pagination & container
-│   │   ├── Flashcard.jsx        # Individual interactive flashcard
-│   │   ├── Quiz.jsx             # Quiz container, state & retry flow
-│   │   ├── QuizQuestion.jsx     # 4-option question & instant feedback
-│   │   ├── QuizResult.jsx       # Score card, review list & retry triggers
-│   │   └── ProgressBar.jsx      # ARIA-accessible progress bar
-│   │
-│   ├── services/
-│   │   └── api.js               # API service with AbortSignal & error parsing
-│   │
-│   ├── utils/
-│   │   └── validateResponse.js  # Client-side Zod validation defense
-│   │
-│   ├── App.jsx                  # Main application state & race condition guard
-│   ├── App.css                  # Responsive component stylesheet
-│   ├── index.css                # Base design tokens & resets
-│   └── main.jsx                 # Vite React entry point
-│
-├── server/
-│   ├── routes/
-│   │   └── study.js             # POST /api/study/generate route
-│   ├── services/
-│   │   └── aiService.js         # Gemini client, prompt engineering, sanitization
-│   ├── schemas/
-│   │   └── studySchema.js       # Zod schema definitions
-│   ├── utils/
-│   │   └── errors.js            # Custom AppError & standardized error formatter
-│   ├── server.js                # Express app entry & middleware
-│   └── .env.example             # Backend environment template
-│
-├── test/
-│   └── validation.test.js       # Automated validation test suite
-│
-├── index.html                   # HTML entry point with Google Fonts
-├── vite.config.js               # Vite config with API proxy
-├── package.json                 # Project scripts & dependencies
-└── README.md
-```
+- **Study Configuration**: Configurable Difficulty (`Beginner`, `Intermediate`, `Advanced`), Flashcard Count (`3`, `5`, `7`, `10`), and Quiz Question Count (`3`, `5`, `7`, `10`).
+- **Difficulty-Aware Generation**: Tailors AI explanation depth, example complexity, and quiz distractor difficulty based on selected difficulty.
+- **Copy Summary**: One-click **Copy Summary** button with instant feedback (`Copied!`).
+- **Interactive Flashcards & Progress**: Card counter (`Card 2 of 5`), progress bar, answer reveal, and keyboard shortcuts (`Enter`/`Space`, `ArrowLeft`/`ArrowRight`).
+- **Knowledge Check Quiz**: Interactive 4-option questions with immediate feedback, score computation, and targeted **Retry Wrong Answers** mode.
+- **Regenerate & New Session**: Re-run active configurations seamlessly or reset cleanly to start a fresh topic.
+- **Accessible & Responsive**: Standard `<button>` elements, `role="alert"`, `aria-live`, and responsive flex/grid layouts.
 
 ---
 
 ## Getting Started
 
-### 1. Clone Repository & Install Dependencies
+### 1. Install Dependencies
 
 ```bash
-git clone https://github.com/Akash2004711/studyflow-ai.git
-cd studyflow-ai
 npm install
 ```
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the root or `server/` directory:
-
-```bash
-cp server/.env.example server/.env
-```
-
-Edit `server/.env` and add your Google Gemini API key:
+Edit `server/.env` or root `.env`:
 
 ```env
 PORT=5000
 GEMINI_API_KEY=your_actual_gemini_api_key
 ```
 
-> **Note**: Get a free API key at [Google AI Studio](https://aistudio.google.com/).
-
 ### 3. Run Application
 
-To run both the Express backend and Vite frontend concurrently:
-
 ```bash
+npm start
+# or
 npm run dev
 ```
 
 - **Frontend**: `http://localhost:5173`
 - **Backend API**: `http://localhost:5000`
-- **Health Check**: `http://localhost:5000/api/health`
-
-Alternatively, you can run services separately:
-
-```bash
-# Terminal 1 - Backend Server
-npm run server
-
-# Terminal 2 - Frontend Client
-npm run client
-```
 
 ### 4. Run Automated Tests
-
-To execute the test suite verifying schema validation and AI edge-case handling:
 
 ```bash
 npm test
 ```
 
----
+### 5. Build for Production
 
-## API Specification
-
-### Generate Study Material
-
-- **Endpoint**: `POST /api/study/generate`
-- **Headers**: `Content-Type: application/json`
-
-#### Request Body
-```json
-{
-  "input": "Explain JavaScript closures for a beginner"
-}
+```bash
+npm run build
 ```
-
-#### Success Response (`200 OK`)
-```json
-{
-  "success": true,
-  "data": {
-    "topic": "JavaScript Closures",
-    "summary": "A closure is the combination of a function bundled together with references to its surrounding state...",
-    "flashcards": [
-      {
-        "id": "card-1",
-        "question": "What is a closure?",
-        "answer": "A closure is a function that remembers variables from its lexical scope even when executed outside that scope."
-      }
-    ],
-    "quiz": [
-      {
-        "id": "question-1",
-        "question": "What does a closure allow a function to retain access to?",
-        "options": [
-          "Its outer lexical environment",
-          "A SQL database connection",
-          "Browser cookies",
-          "Hardware CPU registers"
-        ],
-        "correctAnswer": 0,
-        "explanation": "Closures preserve references to outer scope variables across executions."
-      }
-    ]
-  }
-}
-```
-
-#### Error Response (`400 / 502 / 503`)
-```json
-{
-  "success": false,
-  "error": {
-    "code": "AI_RESPONSE_INVALID",
-    "message": "The AI response did not match the required structured study format."
-  }
-}
-```
-
----
-
-## AI Usage Note
-
-AI coding assistants were used for architectural brainstorming, drafting boilerplate schemas, reviewing edge cases, and accelerating CSS styling. The final implementation, component state flow, race-condition mitigation, and validation rules were reviewed and verified for correctness.
-
----
-
-## Known Limitations
-
-- **LLM Rate Limits**: Free tier Gemini API keys are subject to standard RPM (requests per minute) quotas. The app detects HTTP 429 status codes and displays a clear retry prompt.
-- **Session Persistence**: Currently, study sets exist in memory within the React lifecycle. Reloading the page resets the session.
-
----
-
-## Time Spent
-
-- **Architecture & Schema Planning**: ~45 mins
-- **Backend API & Gemini Service**: ~1 hr
-- **Frontend Components & React State**: ~1.5 hrs
-- **Validation, Error & Stale Request Handling**: ~1 hr
-- **Styling, Polish & Testing**: ~1 hr
-- **Total Time**: ~5.25 hours
-
----
-
-## Future Improvements
-
-- Save sessions to browser `localStorage` or export to PDF / Anki decks
-- Streaming chunked responses for faster perceived TTFB
-- Difficulty toggles (Beginner / Intermediate / Advanced)
-- Keyboard shortcut overlays (`←` / `→` for cards, `1-4` for quiz choices)
-- Study streaks and mastery tracking across multiple study topics

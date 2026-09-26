@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import StudyConfig from './StudyConfig.jsx';
 
 const SUGGESTIONS = [
   'JavaScript Closures for beginners',
@@ -14,7 +15,16 @@ const MAX_CHAR_LIMIT = 5000;
  * TopicInput Component
  * Allows free-form study input, validates client-side limits, and triggers generation.
  */
-export default function TopicInput({ onGenerate, isLoading }) {
+export default function TopicInput({
+  onGenerate,
+  isLoading,
+  difficulty,
+  onDifficultyChange,
+  flashcardCount,
+  onFlashcardCountChange,
+  quizCount,
+  onQuizCountChange,
+}) {
   const [input, setInput] = useState('');
   const [validationError, setValidationError] = useState('');
 
@@ -109,6 +119,17 @@ export default function TopicInput({ onGenerate, isLoading }) {
           )}
         </div>
 
+        {/* Study Configuration Panel */}
+        <StudyConfig
+          difficulty={difficulty}
+          onDifficultyChange={onDifficultyChange}
+          flashcardCount={flashcardCount}
+          onFlashcardCountChange={onFlashcardCountChange}
+          quizCount={quizCount}
+          onQuizCountChange={onQuizCountChange}
+          disabled={isLoading}
+        />
+
         <div className="suggestion-chips-wrapper">
           <div className="suggestion-label">Quick Ideas</div>
           <div className="suggestion-chips" role="group" aria-label="Suggested study topics">
@@ -136,12 +157,12 @@ export default function TopicInput({ onGenerate, isLoading }) {
             {isLoading ? (
               <>
                 <RefreshCw size={18} className="spinner-pulse" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                <span>Generating Study Set...</span>
+                <span>Generating...</span>
               </>
             ) : (
               <>
                 <Sparkles size={18} />
-                <span>Generate Study Material</span>
+                <span>Generate Study Session</span>
               </>
             )}
           </button>
