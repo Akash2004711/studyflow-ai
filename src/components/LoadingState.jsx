@@ -18,7 +18,7 @@ export default function LoadingState() {
 
       <h3 className="state-title loading-title-shimmer">Creating your study session</h3>
       <p className="state-description">
-        Analyzing your notes, drafting concise 3D flashcards, and building interactive quiz questions...
+        Analyzing your notes, drafting concise flashcards, and building interactive quiz questions...
       </p>
 
       <div className="loading-steps-box">
@@ -28,7 +28,7 @@ export default function LoadingState() {
         </div>
         <div className="loading-step-item active">
           <Layers size={16} className="step-icon-active" />
-          <span>Preparing 3D flashcards & quiz practice</span>
+          <span>Preparing flashcards & quiz practice</span>
         </div>
         <div className="loading-step-item">
           <CheckCircle2 size={16} className="step-icon-muted" />

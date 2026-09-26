@@ -15,7 +15,7 @@ export default function Header({ onNewStudy, hasActiveSession }) {
           </div>
           <div className="brand-text-box">
             <h1>StudyFlow AI</h1>
-            <p>Interactive 3D Study Assistant</p>
+            <p> Study Assistant</p>
           </div>
         </div>
 
