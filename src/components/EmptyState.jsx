@@ -44,11 +44,11 @@ export default function EmptyState() {
         </div>
 
         <h2 className="hero-main-title">
-          Turn your knowledge into an <span className="hero-text-gradient">interactive 3D study session.</span>
+          Turn your knowledge into an <span className="hero-text-gradient">interactive study session.</span>
         </h2>
 
         <p className="hero-subtitle">
-          Paste your lecture notes, complex concepts, or topic prompt below to generate instant 3D flip flashcards, smart quiz questions, and concise summaries.
+          Paste your lecture notes, complex concepts, or topic prompt below to generate instant flip flashcards, smart quiz questions, and concise summaries.
         </p>
 
         <div className="hero-features-row">

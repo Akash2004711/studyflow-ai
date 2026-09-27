@@ -86,6 +86,7 @@
   letter-spacing: -0.02em;
   background: linear-gradient(to right, #ffffff, #cbd5e1);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -184,6 +185,7 @@
 .hero-text-gradient {
   background: linear-gradient(135deg, #a5b4fc 0%, #38bdf8 50%, #c084fc 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -561,6 +563,7 @@
   background: linear-gradient(90deg, #fff 0%, #a5b4fc 50%, #fff 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmerText 2.5s infinite linear;
 }
@@ -1099,6 +1102,59 @@
   color: var(--accent-cyan);
 }
 
+/* ==========================================================================
+   State Containers (ErrorState & EmptyState)
+   ========================================================================== */
+.state-container {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.state-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.state-icon-box.error {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+}
+
+.state-icon-box.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.state-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.state-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+
 .quiz-footer-actions {
   display: flex;
   justify-content: flex-end;
@@ -1326,7 +1382,7 @@
     scroll-behavior: auto !important;
   }
 
-  .floating-3d-card, .3d-tilt-card, .flashcard-3d-scene {
+  .floating-3d-card, [class*="3d-tilt-card"], .flashcard-3d-scene {
     transform: none !important;
   }
 }

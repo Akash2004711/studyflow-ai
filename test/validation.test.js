@@ -124,4 +124,15 @@ describe('Study Schema & AI Output Validation Suite', () => {
     const validTest = studyInputSchema.safeParse({ input: 'Explain React state' });
     assert.equal(validTest.success, true);
   });
+
+  it('Fallback generator: produces schema-compliant study set when rate limited', async () => {
+    const { generateFallbackStudyMaterial } = await import('../server/services/aiService.js');
+    const fallback = generateFallbackStudyMaterial('Quantum Computing');
+    const result = validateStudyMaterial(fallback);
+    assert.equal(result.success, true);
+    assert.equal(fallback.topic, 'Quantum Computing');
+    assert.equal(fallback.flashcards.length, 5);
+    assert.equal(fallback.quiz.length, 5);
+  });
 });
+
