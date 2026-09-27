@@ -5,7 +5,6 @@
   position: relative;
 }
 
-/* Ambient dynamic background glows */
 .ambient-background {
   position: fixed;
   inset: 0;
@@ -31,9 +30,6 @@
   z-index: 1;
 }
 
-/* ==========================================================================
-   Header Component
-   ========================================================================== */
 .header-wrapper {
   border-bottom: 1px solid var(--border-subtle);
   background: rgba(11, 15, 25, 0.75);
@@ -86,7 +82,6 @@
   letter-spacing: -0.02em;
   background: linear-gradient(to right, #ffffff, #cbd5e1);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -143,9 +138,6 @@
   box-shadow: 0 0 8px var(--accent-cyan);
 }
 
-/* ==========================================================================
-   Hero Landing Experience & 3D Floating Cards
-   ========================================================================== */
 .hero-landing-wrapper {
   position: relative;
   text-align: center;
@@ -185,7 +177,6 @@
 .hero-text-gradient {
   background: linear-gradient(135deg, #a5b4fc 0%, #38bdf8 50%, #c084fc 100%);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -217,7 +208,6 @@
   color: var(--accent-cyan);
 }
 
-/* Floating 3D Decorative Cards */
 .floating-elements-container {
   position: absolute;
   inset: -20px -60px;
@@ -292,9 +282,6 @@
   color: var(--text-muted);
 }
 
-/* ==========================================================================
-   TopicInput Component
-   ========================================================================== */
 .input-card {
   background: rgba(17, 24, 39, 0.75);
   backdrop-filter: blur(16px);
@@ -490,9 +477,6 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* ==========================================================================
-   LoadingState Component
-   ========================================================================== */
 .loading-3d-container {
   background: rgba(17, 24, 39, 0.75);
   backdrop-filter: blur(16px);
@@ -563,7 +547,6 @@
   background: linear-gradient(90deg, #fff 0%, #a5b4fc 50%, #fff 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmerText 2.5s infinite linear;
 }
@@ -605,9 +588,6 @@
   color: var(--text-muted);
 }
 
-/* ==========================================================================
-   Study Summary Component
-   ========================================================================== */
 .summary-card {
   background: rgba(17, 24, 39, 0.75);
   backdrop-filter: blur(16px);
@@ -714,9 +694,6 @@
 .stat-icon-success { color: var(--success); }
 .stat-icon-danger { color: var(--danger); }
 
-/* ==========================================================================
-   Progress Bar Component
-   ========================================================================== */
 .progress-bar-container {
   width: 100%;
   height: 6px;
@@ -733,9 +710,6 @@
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ==========================================================================
-   Interactive 3D Flashcards Section & Card
-   ========================================================================== */
 .flashcards-section {
   background: rgba(17, 24, 39, 0.75);
   backdrop-filter: blur(16px);
@@ -749,7 +723,6 @@
   gap: 1.5rem;
 }
 
-/* Authentic CSS 3D Scene */
 .flashcard-3d-scene {
   perspective: 1200px;
   width: 100%;
@@ -897,7 +870,6 @@
   border-color: var(--border-highlight);
 }
 
-/* Dots Progress Indicator */
 .flashcard-dots-progress {
   display: flex;
   justify-content: center;
@@ -943,9 +915,6 @@
   color: #c7d2fe;
 }
 
-/* ==========================================================================
-   Quiz Section, MCQ Options & Result Card
-   ========================================================================== */
 .quiz-section {
   background: rgba(17, 24, 39, 0.75);
   backdrop-filter: blur(16px);
@@ -1056,7 +1025,6 @@
   font-weight: 500;
 }
 
-/* Expandable Feedback Banner */
 .feedback-banner {
   padding: 1.25rem;
   border-radius: var(--radius-lg);
@@ -1102,59 +1070,6 @@
   color: var(--accent-cyan);
 }
 
-/* ==========================================================================
-   State Containers (ErrorState & EmptyState)
-   ========================================================================== */
-.state-container {
-  background: rgba(17, 24, 39, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  padding: 3rem 2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: var(--shadow-lg);
-}
-
-.state-icon-box {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.25rem;
-}
-
-.state-icon-box.error {
-  background: var(--danger-light);
-  color: var(--danger);
-  border: 1px solid var(--danger-border);
-}
-
-.state-icon-box.warning {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.state-title {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.state-description {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  max-width: 480px;
-  line-height: 1.6;
-}
-
-
 .quiz-footer-actions {
   display: flex;
   justify-content: flex-end;
@@ -1162,9 +1077,6 @@
   margin-top: 0.5rem;
 }
 
-/* ==========================================================================
-   Quiz Result Component & Circular Score Ring
-   ========================================================================== */
 .result-card {
   display: flex;
   flex-direction: column;
@@ -1342,7 +1254,6 @@
   line-height: 1.5;
 }
 
-/* Dashboard Fade Animation */
 .fade-in-up {
   animation: fadeInUp 0.4s ease-out;
 }
@@ -1352,16 +1263,13 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==========================================================================
-   Responsive & Accessibility (@media)
-   ========================================================================== */
 @media (max-width: 768px) {
   .hero-main-title {
     font-size: 1.85rem;
   }
   
   .floating-elements-container {
-    display: none; /* Hide 3D floating decorations on mobile view */
+    display: none; 
   }
 
   .summary-stats-row {
@@ -1382,7 +1290,7 @@
     scroll-behavior: auto !important;
   }
 
-  .floating-3d-card, [class*="3d-tilt-card"], .flashcard-3d-scene {
+  .floating-3d-card, .3d-tilt-card, .flashcard-3d-scene {
     transform: none !important;
   }
 }

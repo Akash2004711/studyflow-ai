@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Layers, HelpCircle, FileText, Sparkles } from 'lucide-react';
 
 export default function FloatingCard({ icon: Icon, title, badge, previewText, positionClass, delay = 0 }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -11,7 +12,7 @@ export default function FloatingCard({ icon: Icon, title, badge, previewText, po
       const { clientX, clientY } = e;
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-
+      
       const rotateX = ((clientY - centerY) / centerY) * -6;
       const rotateY = ((clientX - centerX) / centerX) * 6;
 

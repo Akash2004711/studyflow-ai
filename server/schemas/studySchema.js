@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Schema for incoming user request payload.
- */
 export const studyInputSchema = z.object({
   input: z
     .string({
@@ -14,19 +11,12 @@ export const studyInputSchema = z.object({
     .max(5000, { message: 'Input cannot exceed 5000 characters.' }),
 });
 
-/**
- * Schema for an individual flashcard.
- */
 export const flashcardSchema = z.object({
   id: z.string().min(1, 'Flashcard ID is required.'),
   question: z.string().min(1, 'Flashcard question cannot be empty.'),
   answer: z.string().min(1, 'Flashcard answer cannot be empty.'),
 });
 
-/**
- * Schema for an individual quiz question.
- * Requires exactly 4 options and a zero-indexed integer correctAnswer (0-3).
- */
 export const quizQuestionSchema = z.object({
   id: z.string().min(1, 'Quiz question ID is required.'),
   question: z.string().min(1, 'Quiz question cannot be empty.'),
@@ -41,9 +31,6 @@ export const quizQuestionSchema = z.object({
   explanation: z.string().min(1, 'Quiz explanation cannot be empty.'),
 });
 
-/**
- * Complete schema for validated AI-generated study material.
- */
 export const studyMaterialSchema = z.object({
   topic: z.string().min(1, 'Topic title cannot be empty.'),
   summary: z.string().min(1, 'Summary cannot be empty.'),
@@ -57,11 +44,6 @@ export const studyMaterialSchema = z.object({
     .max(10),
 });
 
-/**
- * Validates untrusted AI output against the study material schema.
- * @param {unknown} data
- * @returns {{ success: boolean, data?: z.infer<typeof studyMaterialSchema>, error?: z.ZodError }}
- */
 export const validateStudyMaterial = (data) => {
   return studyMaterialSchema.safeParse(data);
 };

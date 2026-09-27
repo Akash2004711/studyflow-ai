@@ -10,16 +10,12 @@ import Quiz from './components/Quiz.jsx';
 import { generateStudyMaterial } from './services/api.js';
 import './App.css';
 
-/**
- * Main StudyFlow AI Application
- */
 export default function App() {
   const [studyMaterial, setStudyMaterial] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastInput, setLastInput] = useState('');
 
-  // Ref to hold active AbortController for race-condition & stale-response protection
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
@@ -78,16 +74,13 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Background ambient radial lighting and mesh gradient */}
       <div className="ambient-background" aria-hidden="true" />
 
       <Header onNewStudy={handleResetNewStudy} hasActiveSession={!!studyMaterial || isLoading} />
 
       <main className="main-content">
-        {/* Input Area */}
         <TopicInput onGenerate={handleGenerate} isLoading={isLoading} />
 
-        {/* Dynamic Study Content States */}
         {isLoading ? (
           <LoadingState />
         ) : error ? (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Plus } from 'lucide-react';
+import { Sparkles, Plus, Layers } from 'lucide-react';
 
 export default function Header({ onNewStudy, hasActiveSession }) {
   return (
@@ -38,3 +38,4 @@ export default function Header({ onNewStudy, hasActiveSession }) {
     </header>
   );
 }
+

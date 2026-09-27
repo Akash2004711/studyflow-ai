@@ -24,7 +24,7 @@ export default function LoadingState() {
         </div>
         <div className="loading-step-item active">
           <Layers size={16} className="step-icon-active" />
-          <span>Preparing flashcards &amp; quiz practice</span>
+          <span>Preparing flashcards & quiz practice</span>
         </div>
         <div className="loading-step-item">
           <CheckCircle2 size={16} className="step-icon-muted" />
@@ -34,3 +34,4 @@ export default function LoadingState() {
     </div>
   );
 }
+

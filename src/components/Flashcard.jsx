@@ -90,7 +90,7 @@ export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
           <div className="flashcard-face-header">
             <span className="flashcard-type-badge answer-badge">
               <Sparkles size={13} />
-              <span>ANSWER &amp; EXPLANATION</span>
+              <span>ANSWER & EXPLANATION</span>
             </span>
             <span className="flip-hint">
               <RotateCw size={13} /> Click to flip
@@ -129,3 +129,4 @@ export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
     </div>
   );
 }
+

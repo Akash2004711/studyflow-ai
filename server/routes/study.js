@@ -5,13 +5,8 @@ import { AppError, ErrorCodes, formatErrorResponse } from '../utils/errors.js';
 
 const router = Router();
 
-/**
- * POST /api/study/generate
- * Accepts a user study input/topic, queries the AI provider, and returns validated structured data.
- */
 router.post('/generate', async (req, res) => {
   try {
-    // 1. Validate request payload using Zod
     const inputValidation = studyInputSchema.safeParse(req.body);
 
     if (!inputValidation.success) {
@@ -21,10 +16,8 @@ router.post('/generate', async (req, res) => {
 
     const { input } = inputValidation.data;
 
-    // 2. Call AI service which performs LLM query, sanitization, and schema validation
     const studyMaterial = await generateStudyMaterialFromAI(input);
 
-    // 3. Return validated response
     return res.status(200).json({
       success: true,
       data: studyMaterial,

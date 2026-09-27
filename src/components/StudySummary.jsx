@@ -100,3 +100,4 @@ export default function StudySummary({ topic, summary, flashcardCount, quizCount
     </div>
   );
 }
+

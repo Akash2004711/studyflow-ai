@@ -132,3 +132,4 @@ export default function FlashcardSection({ flashcards = [] }) {
     </section>
   );
 }
+

@@ -90,7 +90,7 @@ describe('Study Schema & AI Output Validation Suite', () => {
         {
           id: 'q-1',
           question: 'What is JSX?',
-          options: ['Option 1', 'Option 2', 'Option 3'], // Only 3 options
+          options: ['Option 1', 'Option 2', 'Option 3'], 
           correctAnswer: 0,
           explanation: 'JSX requires 4 choices.',
         },
@@ -108,7 +108,7 @@ describe('Study Schema & AI Output Validation Suite', () => {
           id: 'q-1',
           question: 'What is JSX?',
           options: ['Option A', 'Option B', 'Option C', 'Option D'],
-          correctAnswer: 8, // Invalid index
+          correctAnswer: 8, 
           explanation: 'Index 8 is out of range.',
         },
       ],
@@ -125,14 +125,20 @@ describe('Study Schema & AI Output Validation Suite', () => {
     assert.equal(validTest.success, true);
   });
 
-  it('Fallback generator: produces schema-compliant study set when rate limited', async () => {
-    const { generateFallbackStudyMaterial } = await import('../server/services/aiService.js');
-    const fallback = generateFallbackStudyMaterial('Quantum Computing');
-    const result = validateStudyMaterial(fallback);
-    assert.equal(result.success, true);
-    assert.equal(fallback.topic, 'Quantum Computing');
-    assert.equal(fallback.flashcards.length, 5);
-    assert.equal(fallback.quiz.length, 5);
+  it('AI Service: Rejects unconfigured or empty API key', async () => {
+    const originalKey = process.env.GEMINI_API_KEY;
+    process.env.GEMINI_API_KEY = '';
+    const { generateStudyMaterialFromAI } = await import('../server/services/aiService.js');
+    await assert.rejects(
+      async () => {
+        await generateStudyMaterialFromAI('test input');
+      },
+      (err) => {
+        assert.equal(err.statusCode, 503);
+        assert.match(err.message, /Gemini API key is not configured/);
+        return true;
+      }
+    );
+    process.env.GEMINI_API_KEY = originalKey;
   });
 });
-

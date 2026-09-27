@@ -24,7 +24,7 @@ export default function QuizResult({
     if (correctCount === 0) return;
 
     let current = 0;
-    const duration = 600;
+    const duration = 600; 
     const stepTime = Math.max(Math.floor(duration / correctCount), 50);
 
     const timer = setInterval(() => {
@@ -158,3 +158,4 @@ export default function QuizResult({
     </div>
   );
 }
+

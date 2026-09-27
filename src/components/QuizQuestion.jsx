@@ -21,7 +21,7 @@ export default function QuizQuestion({
   }, [questionData]);
 
   const handleSelectOption = (index) => {
-    if (isSubmitted) return;
+    if (isSubmitted) return; 
     setSelectedOption(index);
     if (validationError) setValidationError('');
   };
@@ -146,3 +146,4 @@ export default function QuizQuestion({
     </div>
   );
 }
+
