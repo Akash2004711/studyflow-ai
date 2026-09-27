@@ -83,17 +83,15 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ```
 > 💡 **Tip**: Get a free API key at [Google AI Studio](https://aistudio.google.com/).
 
-### 4. Run Development Server
-Start both Express backend and Vite frontend concurrently:
+### 4. Run Application
+Start both Express backend and Vite frontend concurrently with `npm start` (or `npm run dev`):
 ```bash
-npm run dev
+npm install && npm start
 ```
 
-- **Frontend App**: `http://localhost:5173`
+- **Frontend Client**: `http://localhost:5173`
 - **Backend API**: `http://localhost:5001`
 - **Health Check**: `http://localhost:5001/api/health`
-
-*(Note: If you run `npm start`, it runs the Node backend server on port 5001. Make sure `npm run dev` isn't already running in another terminal window to avoid port collision).*
 
 ### 5. Run Automated Tests
 Execute the automated validation and error-handling test suite:
