@@ -10,10 +10,6 @@ const SUGGESTIONS = [
 
 const MAX_CHAR_LIMIT = 5000;
 
-/**
- * TopicInput Component
- * Large premium 3D input card with character counter, focus glow, 3D mouse tilt, and smooth CTA.
- */
 export default function TopicInput({ onGenerate, isLoading }) {
   const [input, setInput] = useState('');
   const [validationError, setValidationError] = useState('');
@@ -106,7 +102,7 @@ export default function TopicInput({ onGenerate, isLoading }) {
           What do you want to learn today?
         </h2>
         <p className="input-subtitle">
-          Paste your study notes, concepts, or topic to generate interactive flashcards & quiz questions.
+          Paste your study notes, concepts, or topic to generate interactive flashcards &amp; quiz questions.
         </p>
       </div>
 
@@ -188,4 +184,3 @@ export default function TopicInput({ onGenerate, isLoading }) {
     </section>
   );
 }
-

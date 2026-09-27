@@ -1,23 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, HelpCircle, FileText, Sparkles } from 'lucide-react';
 
-/**
- * FloatingCard Component
- * Interactive decorative card with mouse-aware subtle 3D tilt, float animation, and glassmorphism styling.
- */
 export default function FloatingCard({ icon: Icon, title, badge, previewText, positionClass, delay = 0 }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      // Check prefers-reduced-motion
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return;
       }
       const { clientX, clientY } = e;
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      
+
       const rotateX = ((clientY - centerY) / centerY) * -6;
       const rotateY = ((clientX - centerX) / centerX) * 6;
 

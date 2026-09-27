@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layers, HelpCircle, BookOpen, Copy, Check } from 'lucide-react';
 
-/**
- * StudySummary Component
- * Displays verified topic name, summary body, item counts, 3D hover depth, and a Copy Summary action with checkmark feedback.
- */
 export default function StudySummary({ topic, summary, flashcardCount, quizCount }) {
   const [copied, setCopied] = useState(false);
   const cardRef = useRef(null);
@@ -104,4 +100,3 @@ export default function StudySummary({ topic, summary, flashcardCount, quizCount
     </div>
   );
 }
-

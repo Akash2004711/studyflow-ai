@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Eye, EyeOff, RotateCw, Sparkles, HelpCircle } from 'lucide-react';
 
-/**
- * Flashcard Component
- * Renders an authentic 3D flip card utilizing CSS perspective, transform-style: preserve-3d,
- * backface-visibility: hidden, and interactive rotateY(180deg) animations.
- */
 export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -22,7 +17,6 @@ export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      // Subtle mouse tilt effect limited to 6deg
       const rotateX = ((y - centerY) / centerY) * -5;
       const rotateY = ((x - centerX) / centerX) * 5;
 
@@ -62,7 +56,6 @@ export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
       }}
     >
       <div className={`flashcard-3d-inner ${isAnswerRevealed ? 'is-flipped' : ''}`}>
-        {/* CARD FRONT */}
         <div className="flashcard-3d-face flashcard-front">
           <div className="flashcard-face-header">
             <span className="flashcard-type-badge">
@@ -93,12 +86,11 @@ export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
           </div>
         </div>
 
-        {/* CARD BACK */}
         <div className="flashcard-3d-face flashcard-back">
           <div className="flashcard-face-header">
             <span className="flashcard-type-badge answer-badge">
               <Sparkles size={13} />
-              <span>ANSWER & EXPLANATION</span>
+              <span>ANSWER &amp; EXPLANATION</span>
             </span>
             <span className="flip-hint">
               <RotateCw size={13} /> Click to flip
@@ -137,4 +129,3 @@ export default function Flashcard({ card, isAnswerRevealed, onToggleAnswer }) {
     </div>
   );
 }
-

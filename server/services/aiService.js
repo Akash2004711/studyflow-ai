@@ -2,7 +2,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { validateStudyMaterial } from '../schemas/studySchema.js';
 import { AppError, ErrorCodes } from '../utils/errors.js';
 
-// Prompt sent to Gemini instructing it to return clean JSON
 const SYSTEM_PROMPT = `You are an AI study assistant. Your goal is to create high-quality study materials based on the user's input topic or notes.
 
 Return ONLY a single valid JSON object (no markdown, no backticks, no explanations) using this exact format:
@@ -32,10 +31,8 @@ Rules:
 - Generate 5 quiz questions (id: question-1 to question-5).
 - Each quiz question must have 4 options and a correctAnswer index (0 to 3).`;
 
-// Utility to pause execution for retrying requests
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Helper to check if an error is due to AI rate limits or quota bounds
 const checkRateLimit = (error) => {
   if (!error) return false;
   if (error.status === 429 || error.statusCode === 429) return true;
@@ -49,7 +46,6 @@ const checkRateLimit = (error) => {
   );
 };
 
-// Strips markdown formatting if the model wraps JSON in code blocks
 const cleanJsonResponse = (text) => {
   if (!text || typeof text !== 'string') return '';
   let cleaned = text.trim();
@@ -68,7 +64,6 @@ const cleanJsonResponse = (text) => {
   return cleaned.trim();
 };
 
-// Generates fallback study content if the AI service hits rate limits or is offline
 export function generateFallbackStudyMaterial(topicInput) {
   const cleanTopic = topicInput.trim().replace(/^['"\s]+|['"\s]+$/g, '');
   const topicName = cleanTopic.charAt(0).toUpperCase() + cleanTopic.slice(1);
@@ -159,7 +154,7 @@ export function generateFallbackStudyMaterial(topicInput) {
           `Cramming everything at the last minute.`,
           `Spaced repetition combined with self-testing.`,
           `Reading a text once and never looking back.`,
-          `Skipping questions you got wrong.`,
+          `Ignoring missed quiz questions.`,
         ],
         correctAnswer: 1,
         explanation: `Spaced repetition and checking quiz explanations ensures complete mastery over time.`,
@@ -168,7 +163,6 @@ export function generateFallbackStudyMaterial(topicInput) {
   };
 }
 
-// Main function to generate study sets via Gemini AI API
 export async function generateStudyMaterialFromAI(userInput) {
   const envKeys = process.env.GEMINI_API_KEY || '';
   const apiKeys = envKeys
@@ -176,7 +170,6 @@ export async function generateStudyMaterialFromAI(userInput) {
     .map((key) => key.trim())
     .filter((key) => key && key !== 'your_gemini_api_key_here');
 
-  // If no API key is set, use the fallback generator
   if (apiKeys.length === 0) {
     console.warn('[AI Service] No Gemini API key provided. Using fallback study material generator.');
     return generateFallbackStudyMaterial(userInput);
@@ -196,7 +189,6 @@ export async function generateStudyMaterialFromAI(userInput) {
   let lastError = null;
   let isRateLimited = false;
 
-  // Loop through available API keys and model options
   for (const apiKey of apiKeys) {
     if (rawResponseText) break;
     const aiClient = new GoogleGenerativeAI(apiKey);
@@ -224,12 +216,10 @@ export async function generateStudyMaterialFromAI(userInput) {
         } catch (err) {
           lastError = err;
 
-          // Stop trying this key if it's invalid or unauthorized
           if (err.status === 401 || err.status === 403) {
             break;
           }
 
-          // Handle rate limiting with retries
           if (checkRateLimit(err)) {
             isRateLimited = true;
             if (retriesLeft > 0) {
@@ -247,7 +237,6 @@ export async function generateStudyMaterialFromAI(userInput) {
     }
   }
 
-  // Fallback if AI response was not retrieved
   if (!rawResponseText) {
     if (lastError?.status === 401 || lastError?.status === 403) {
       throw new AppError('Invalid Gemini API key. Please check your .env configuration.', 401, ErrorCodes.AI_SERVICE_UNAVAILABLE);
@@ -261,7 +250,6 @@ export async function generateStudyMaterialFromAI(userInput) {
     return generateFallbackStudyMaterial(userInput);
   }
 
-  // Parse cleaned JSON response
   const jsonString = cleanJsonResponse(rawResponseText);
   let parsedData;
 
@@ -272,7 +260,6 @@ export async function generateStudyMaterialFromAI(userInput) {
     return generateFallbackStudyMaterial(userInput);
   }
 
-  // Validate output against our schema
   const validationResult = validateStudyMaterial(parsedData);
   if (!validationResult.success) {
     console.error('[AI Service] AI response schema validation failed:', validationResult.error.format());

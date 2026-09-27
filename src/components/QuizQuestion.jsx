@@ -3,11 +3,6 @@ import { CheckCircle, XCircle, ArrowRight, Check, Sparkles } from 'lucide-react'
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
-/**
- * QuizQuestion Component
- * Renders an individual MCQ option list with option lift micro-interactions, selection indicators,
- * and expandable educational explanation feedback after submission.
- */
 export default function QuizQuestion({
   questionData,
   questionNumber,
@@ -19,7 +14,6 @@ export default function QuizQuestion({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  // Reset local state when moving to a new question
   useEffect(() => {
     setSelectedOption(null);
     setIsSubmitted(false);
@@ -27,7 +21,7 @@ export default function QuizQuestion({
   }, [questionData]);
 
   const handleSelectOption = (index) => {
-    if (isSubmitted) return; // Prevent changing after submission
+    if (isSubmitted) return;
     setSelectedOption(index);
     if (validationError) setValidationError('');
   };
@@ -107,7 +101,6 @@ export default function QuizQuestion({
         </p>
       )}
 
-      {/* Immediate post-submission expanding explanation banner */}
       {isSubmitted && (
         <div className={`feedback-banner ${isCorrect ? 'correct' : 'incorrect'}`} role="alert">
           <div className="feedback-status">
@@ -153,4 +146,3 @@ export default function QuizQuestion({
     </div>
   );
 }
-

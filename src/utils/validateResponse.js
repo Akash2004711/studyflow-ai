@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Zod schema for client-side defense-in-depth response validation.
- * Even if the backend validated it, client-side validation guarantees
- * the React state will never receive malformed data that could crash UI components.
- */
 const clientFlashcardSchema = z.object({
   id: z.string().min(1),
   question: z.string().min(1),
@@ -26,11 +21,6 @@ export const clientStudyMaterialSchema = z.object({
   quiz: z.array(clientQuizQuestionSchema).min(1),
 });
 
-/**
- * Validates the study material object on the frontend.
- * @param {unknown} data
- * @returns {{ isValid: boolean, validatedData?: z.infer<typeof clientStudyMaterialSchema>, error?: string }}
- */
 export function validateStudyResponse(data) {
   if (!data || typeof data !== 'object') {
     return {

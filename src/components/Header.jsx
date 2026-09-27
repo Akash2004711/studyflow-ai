@@ -1,10 +1,6 @@
 import React from 'react';
-import { Sparkles, Plus, Layers } from 'lucide-react';
+import { Sparkles, Plus } from 'lucide-react';
 
-/**
- * Header Component
- * Minimal premium header featuring custom visual 3D logo mark, AI indicator, and + New Study reset action.
- */
 export default function Header({ onNewStudy, hasActiveSession }) {
   return (
     <header className="header-wrapper">
@@ -42,4 +38,3 @@ export default function Header({ onNewStudy, hasActiveSession }) {
     </header>
   );
 }
-

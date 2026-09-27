@@ -2,14 +2,9 @@ import React from 'react';
 import { Layers, HelpCircle, FileText, Sparkles, CheckCircle2 } from 'lucide-react';
 import FloatingCard from './FloatingCard.jsx';
 
-/**
- * EmptyState / Hero Component
- * Creates a premium 3D landing experience when no active study session exists.
- */
 export default function EmptyState() {
   return (
     <div className="hero-landing-wrapper">
-      {/* Decorative 3D Floating Elements surrounding the main input area */}
       <div className="floating-elements-container" aria-hidden="true">
         <FloatingCard
           icon={Layers}
@@ -69,4 +64,3 @@ export default function EmptyState() {
     </div>
   );
 }
-

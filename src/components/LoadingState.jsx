@@ -1,10 +1,6 @@
 import React from 'react';
 import { Sparkles, Brain, Layers, CheckCircle2 } from 'lucide-react';
 
-/**
- * LoadingState Component
- * Premium AI generation loading animation with pulsing icons and progress visuals.
- */
 export default function LoadingState() {
   return (
     <div className="state-container loading-3d-container" aria-live="assertive" aria-busy="true">
@@ -28,7 +24,7 @@ export default function LoadingState() {
         </div>
         <div className="loading-step-item active">
           <Layers size={16} className="step-icon-active" />
-          <span>Preparing flashcards & quiz practice</span>
+          <span>Preparing flashcards &amp; quiz practice</span>
         </div>
         <div className="loading-step-item">
           <CheckCircle2 size={16} className="step-icon-muted" />
@@ -38,4 +34,3 @@ export default function LoadingState() {
     </div>
   );
 }
-

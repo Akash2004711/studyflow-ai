@@ -2,14 +2,6 @@ import { validateStudyResponse } from '../utils/validateResponse';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-/**
- * Sends a study generation request to the backend API.
- * Accepts an AbortSignal to cancel stale requests if the user fires a new request.
- *
- * @param {string} input - The topic name or study notes from the user.
- * @param {AbortSignal} [signal] - Optional AbortSignal for race-condition cancellation.
- * @returns {Promise<{ topic: string, summary: string, flashcards: Array, quiz: Array }>}
- */
 export async function generateStudyMaterial(input, signal) {
   if (!input || !input.trim()) {
     throw new Error('Please provide a study topic or notes before generating.');
@@ -27,7 +19,6 @@ export async function generateStudyMaterial(input, signal) {
     });
   } catch (err) {
     if (err.name === 'AbortError') {
-      // Re-throw AbortError so caller can ignore superseded requests cleanly
       throw err;
     }
     throw new Error(
@@ -51,7 +42,6 @@ export async function generateStudyMaterial(input, signal) {
     throw err;
   }
 
-  // Client-side defense-in-depth validation
   const validation = validateStudyResponse(responseData.data);
   if (!validation.isValid) {
     throw new Error(

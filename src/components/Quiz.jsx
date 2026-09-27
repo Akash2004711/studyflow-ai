@@ -4,11 +4,6 @@ import ProgressBar from './ProgressBar.jsx';
 import QuizQuestion from './QuizQuestion.jsx';
 import QuizResult from './QuizResult.jsx';
 
-/**
- * Quiz Component
- * Manages the interactive quiz state lifecycle: single question presentation,
- * score computation, results review, and targeted retries for incorrect answers.
- */
 export default function Quiz({ initialQuestions = [] }) {
   const [activeQuestions, setActiveQuestions] = useState(initialQuestions);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,7 +11,6 @@ export default function Quiz({ initialQuestions = [] }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [isRetryMode, setIsRetryMode] = useState(false);
 
-  // Sync state whenever new study material is generated
   useEffect(() => {
     setActiveQuestions(initialQuestions);
     setCurrentIndex(0);
@@ -38,7 +32,6 @@ export default function Quiz({ initialQuestions = [] }) {
     }
   };
 
-  // Start a focused quiz session containing only the missed questions
   const handleRetryWrong = () => {
     const wrongAnswers = answers.filter((a) => !a.isCorrect);
     const wrongQuestionIds = new Set(wrongAnswers.map((a) => a.questionId));
@@ -53,7 +46,6 @@ export default function Quiz({ initialQuestions = [] }) {
     }
   };
 
-  // Restart the full quiz from question 1
   const handleRestartFullQuiz = () => {
     setActiveQuestions(initialQuestions);
     setCurrentIndex(0);

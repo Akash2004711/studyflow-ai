@@ -1,6 +1,3 @@
-/**
- * Custom application error class for structured API error handling.
- */
 export class AppError extends Error {
   constructor(message, statusCode = 500, code = 'INTERNAL_ERROR', details = null) {
     super(message);
@@ -12,9 +9,6 @@ export class AppError extends Error {
   }
 }
 
-/**
- * Standard error codes used across the StudyFlow AI backend.
- */
 export const ErrorCodes = {
   INVALID_INPUT: 'INVALID_INPUT',
   AI_SERVICE_UNAVAILABLE: 'AI_SERVICE_UNAVAILABLE',
@@ -24,9 +18,6 @@ export const ErrorCodes = {
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 };
 
-/**
- * Creates a standardized error response object.
- */
 export const formatErrorResponse = (error) => {
   const code = error.code || ErrorCodes.INTERNAL_ERROR;
   const message = error.message || 'An unexpected error occurred.';

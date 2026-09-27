@@ -1,9 +1,5 @@
 import React from 'react';
 
-/**
- * ProgressBar Component
- * Accessible, animated horizontal progress indicator.
- */
 export default function ProgressBar({ current, total, label = 'Progress' }) {
   const percentage = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
 

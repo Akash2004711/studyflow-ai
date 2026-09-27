@@ -3,10 +3,6 @@ import { ChevronLeft, ChevronRight, Layers, Eye } from 'lucide-react';
 import Flashcard from './Flashcard.jsx';
 import ProgressBar from './ProgressBar.jsx';
 
-/**
- * FlashcardSection Component
- * Manages active card index, navigation boundaries, progress bar, and keyboard shortcuts (Arrow keys / Space).
- */
 export default function FlashcardSection({ flashcards = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
@@ -18,10 +14,8 @@ export default function FlashcardSection({ flashcards = [] }) {
     setIsAnswerRevealed(false);
   }, [flashcards]);
 
-  // Keyboard navigation support (ArrowLeft, ArrowRight, Space)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't intercept if user is typing in textarea or input
       if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
 
       if (e.key === 'ArrowLeft') {
@@ -87,7 +81,6 @@ export default function FlashcardSection({ flashcards = [] }) {
         onToggleAnswer={handleToggleAnswer}
       />
 
-      {/* Visual Dot Progress Bar */}
       <div className="flashcard-dots-progress" aria-hidden="true">
         {flashcards.map((_, idx) => (
           <span
@@ -139,4 +132,3 @@ export default function FlashcardSection({ flashcards = [] }) {
     </section>
   );
 }
-

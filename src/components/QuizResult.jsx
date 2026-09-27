@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Award, RotateCcw, CheckCircle2, XCircle, Sparkles, BookOpen } from 'lucide-react';
 
-/**
- * QuizResult Component
- * Shows score overview with animated score count-up, SVG circular indicator, retry actions, and detailed review.
- */
 export default function QuizResult({
   results = [],
   onRetryWrong,
@@ -16,11 +12,9 @@ export default function QuizResult({
   const percentage = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const incorrectCount = total - correctCount;
 
-  // Animated score ticker state
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
-    // If reduced motion is preferred, jump straight to target
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setAnimatedScore(correctCount);
       return;
@@ -30,7 +24,7 @@ export default function QuizResult({
     if (correctCount === 0) return;
 
     let current = 0;
-    const duration = 600; // ms
+    const duration = 600;
     const stepTime = Math.max(Math.floor(duration / correctCount), 50);
 
     const timer = setInterval(() => {
@@ -75,7 +69,6 @@ export default function QuizResult({
   return (
     <div className="result-card 3d-tilt-card">
       <div className="score-overview">
-        {/* SVG Circular Animated Progress Meter */}
         <div className="score-circle-wrapper">
           <svg className="score-ring-svg" viewBox="0 0 100 100">
             <circle className="score-ring-bg" cx="50" cy="50" r="45" />
@@ -124,7 +117,6 @@ export default function QuizResult({
         </button>
       </div>
 
-      {/* Question-by-Question Review */}
       <div className="review-list">
         <h4 className="review-list-title">Detailed Question Review</h4>
 
@@ -166,4 +158,3 @@ export default function QuizResult({
     </div>
   );
 }
-
