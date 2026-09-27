@@ -1,206 +1,210 @@
-# StudyFlow AI
+# 🎓 StudyFlow AI
 
-An AI-powered interactive study assistant built with React, Vite, Node.js, Express, Gemini, and Zod. StudyFlow AI turns free-form topics, notes, or questions into structured study materials—featuring concise summaries, interactive flip flashcards, multiple-choice quizzes, and targeted review for incorrect questions.
+**StudyFlow AI** is a state-of-the-art, interactive AI-powered study assistant built with **React**, **Vite**, **Node.js**, **Express**, **Google Gemini**, and **Zod**.
+
+It transforms raw lecture notes, free-form text, or study topics into structured study sets featuring:
+- 📖 **Concise Topic Summaries**
+- 🎴 **3D Interactive Flip Flashcards** (with keyboard arrow navigation)
+- 🧪 **5-Question Knowledge Quizzes** (with instant educational rationales)
+- 🎯 **Targeted Re-Test Mode** (isolates missed questions until 100% mastery)
 
 ---
 
-## Architecture & Data Flow
+## 🏗️ Architecture & Data Flow
 
 ```text
-User Input (Topic / Notes)
-          │
-          ▼
-┌──────────────────┐
-│   React Client   │  ← Client-side input validation & AbortController protection
-└─────────┬────────┘
-          │ POST /api/study/generate
-          ▼
-┌──────────────────┐
-│  Express Server  │  ← Zod request payload validation
-└─────────┬────────┘
-          │ Structured Prompt & JSON enforcement
-          ▼
-┌──────────────────┐
-│    Gemini LLM    │  ← Generates structured JSON (No conversational markdown)
-└─────────┬────────┘
-          │ Raw JSON response
-          ▼
-┌──────────────────┐
-│ Backend Service  │  ← JSON sanitization & Zod Schema Validation
-└─────────┬────────┘
-          │ Validated Payload
-          ▼
-┌──────────────────┐
-│   React Client   │  ← Defense-in-depth Zod validation & UI state rendering
-└──────────────────┘
+               ┌────────────────────────┐
+               │    User Study Input    │
+               └───────────┬────────────┘
+                           │
+                           ▼
+               ┌────────────────────────┐
+               │   React Frontend Client│  ← Client input validation (Zod)
+               └───────────┬────────────┘  ← AbortController race-condition guard
+                           │ POST /api/study/generate
+                           ▼
+               ┌────────────────────────┐
+               │     Express Server     │  ← Zod request payload parsing
+               └───────────┬────────────┘
+                           │ System Prompt + JSON Schema
+                           ▼
+               ┌────────────────────────┐
+               │    Google Gemini AI    │  ← Model Fallback: gemini-3.8-flash, gemini-2.5-flash
+               └───────────┬────────────┘
+                           │ Raw JSON response string
+                           ▼
+               ┌────────────────────────┐
+               │    Backend Service     │  ← JSON Sanitization & Backend Zod Schema Validation
+               └───────────┬────────────┘
+                           │ Validated Payload
+                           ▼
+               ┌────────────────────────┐
+               │   React Frontend Client│  ← Client-side Zod validation defense & state render
+               └────────────────────────┘
 ```
 
 ---
 
-## Key Features
+## ✨ Key Features
 
-- **Free-Form Study Input**: Accepts custom topics, questions, paragraphs, or lecture notes with character counting, validation feedback, and quick suggestions.
-- **Structured AI Output**: Strictly enforces JSON schema output from Gemini (no raw AI text or unparsed markdown dumped into UI).
-- **Dual-Layer Schema Validation**: Treats all AI outputs as untrusted data. Validates using Zod on both the backend service and the client before state updates.
-- **Interactive Flashcards**:
-  - Flip / reveal answer mechanism
-  - Card-by-card navigation with boundary protection (Previous / Next)
-  - Animated progress bar and card counters
-- **Knowledge Check Quiz**:
-  - 5 multiple-choice questions (4 options each)
-  - Single selection validation (cannot submit without selection)
-  - Immediate visual feedback (correct/incorrect) with educational explanations
-- **Comprehensive Score Screen**:
-  - Score circle displaying score fraction and percentage
-  - Categorized feedback based on performance
-  - Question-by-question review showing user choice, correct choice, and rationale
-- **Retry Wrong Answers**:
-  - Automatically isolates questions answered incorrectly
-  - Launches a focused quiz session containing only the missed questions
-  - Displays a perfect-score message when all questions are mastered
-- **Robust Failure & State Handling**:
-  - Loading skeleton state with progress indicators
-  - Empty onboarding state
-  - Dedicated error boundary state with clean retry action
-  - Handles malformed JSON, schema mismatch, missing fields, rate limits, and network drops
-- **Stale Request & Race-Condition Prevention**: Uses React `useRef` with native `AbortController` to cancel in-flight requests when a new generation is initiated.
-- **Secure Backend Proxy**: The Gemini API key is isolated strictly in server-side environment variables and never exposed to browser client code.
-- **Responsive & Accessible**: Responsive layout optimized for 320px to 1440px+ displays with semantic HTML and ARIA attributes.
+### 🧠 Free-Form Input & Smart Topic Generation
+- Accepts custom topics, broad concepts, lecture notes, or specific questions.
+- Includes quick-start topic suggestions, real-time character counter, and instant client-side validation.
 
----
+### 🎴 Interactive 3D Flip Flashcards
+- Smooth 3D flip animation revealing concept answers.
+- Progress tracking bar with active card indicators.
+- **Keyboard Shortcut Support**: Navigate cards effortlessly using `Left Arrow (←)` and `Right Arrow (→)` keys.
 
-## Tech Stack
+### 🧪 Multiple-Choice Knowledge Check
+- Generates 5 unique multiple-choice questions with 4 distinct options per question.
+- Instant visual feedback on submission (green highlight for correct, red for incorrect).
+- In-depth educational explanations provided for every question.
 
-- **Frontend**: React 18, Vite 6, Vanilla CSS (Custom Design System with CSS variables), Lucide Icons, Zod
-- **Backend**: Node.js, Express 4, CORS, Dotenv, Zod, `@google/generative-ai`
-- **Testing**: Node.js native test runner (`node:test`, `node:assert`)
+### 🎯 Targeted Retry Mode for Missed Questions
+- Automatically isolates questions answered incorrectly.
+- Allows students to re-attempt only missed items without regenerating the entire study set.
+- Celebrates with a completion badge once 100% accuracy is reached.
+
+### 🛡️ Dual-Layer Schema Validation (Defense-in-Depth)
+- Uses **Zod** to validate AI outputs on **both the backend service and frontend client**.
+- Guarantees zero raw AI text corruption or invalid UI states.
+
+### ⚡ Stale Request & Race-Condition Guarding
+- Utilizes React `useRef` and native `AbortController` to automatically cancel pending network requests when a user initiates a new generation.
+
+### 🔄 Multi-Model Resilience & Automatic Fallback
+- Dynamically cycles through available Gemini model endpoints (`gemini-3.8-flash`, `gemini-2.5-flash`, etc.) to guarantee high availability and bypass model deprecations.
 
 ---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18, Vite 6, Vanilla CSS (Design Tokens & CSS Variables), Lucide Icons, Zod
+- **Backend**: Node.js (ES Modules), Express 4, Dotenv, CORS, Zod, `@google/generative-ai`
+- **Testing**: Node.js Native Test Runner (`node --test`)
+
+---
+
+## 📂 Project Structure
 
 ```text
 studyflow-ai/
 │
 ├── src/
 │   ├── components/
-│   │   ├── Header.jsx           # App branding & AI status badge
-│   │   ├── TopicInput.jsx       # Textarea input, validation & quick ideas
-│   │   ├── EmptyState.jsx       # Initial onboarding screen
-│   │   ├── LoadingState.jsx     # Animated generation progress state
-│   │   ├── ErrorState.jsx       # Error card with retry action
-│   │   ├── StudySummary.jsx     # Verified topic & summary card
-│   │   ├── FlashcardSection.jsx # Flashcard pagination & container
-│   │   ├── Flashcard.jsx        # Individual interactive flashcard
-│   │   ├── Quiz.jsx             # Quiz container, state & retry flow
-│   │   ├── QuizQuestion.jsx     # 4-option question & instant feedback
-│   │   ├── QuizResult.jsx       # Score card, review list & retry triggers
-│   │   └── ProgressBar.jsx      # ARIA-accessible progress bar
+│   │   ├── Header.jsx           # Application header & AI status badge
+│   │   ├── TopicInput.jsx       # Input form, validation & quick suggestion pills
+│   │   ├── EmptyState.jsx       # Welcome & onboarding screen
+│   │   ├── LoadingState.jsx     # Generation progress & skeleton loader
+│   │   ├── ErrorState.jsx       # Error card with retry trigger
+│   │   ├── StudySummary.jsx     # Topic summary card
+│   │   ├── FlashcardSection.jsx # Flashcard section container & pagination
+│   │   ├── Flashcard.jsx        # Interactive 3D flip card component
+│   │   ├── Quiz.jsx             # Quiz state management & retry workflow
+│   │   ├── QuizQuestion.jsx     # Multiple choice question component
+│   │   ├── QuizResult.jsx       # Quiz score dashboard & detailed breakdown
+│   │   └── ProgressBar.jsx      # Accessible progress bar component
 │   │
 │   ├── services/
-│   │   └── api.js               # API service with AbortSignal & error parsing
+│   │   └── api.js               # Frontend API client with AbortSignal support
 │   │
 │   ├── utils/
 │   │   └── validateResponse.js  # Client-side Zod validation defense
 │   │
-│   ├── App.jsx                  # Main application state & race condition guard
-│   ├── App.css                  # Responsive component stylesheet
-│   ├── index.css                # Base design tokens & resets
-│   └── main.jsx                 # Vite React entry point
+│   ├── App.jsx                  # Root state orchestration & request abort logic
+│   ├── App.css                  # Responsive styles & design system tokens
+│   ├── index.css                # Base resets & typography imports
+│   └── main.jsx                 # React DOM entry point
 │
 ├── server/
 │   ├── routes/
-│   │   └── study.js             # POST /api/study/generate route
+│   │   └── study.js             # POST /api/study/generate endpoint
 │   ├── services/
-│   │   └── aiService.js         # Gemini client, prompt engineering, sanitization
+│   │   └── aiService.js         # Gemini SDK client, prompt engineering, sanitization
 │   ├── schemas/
-│   │   └── studySchema.js       # Zod schema definitions
+│   │   └── studySchema.js       # Zod schemas for input and study material output
 │   ├── utils/
-│   │   └── errors.js            # Custom AppError & standardized error formatter
-│   ├── server.js                # Express app entry & middleware
-│   └── .env.example             # Backend environment template
+│   │   └── errors.js            # Custom AppError class & standardized error handler
+│   ├── server.js                # Express app configuration & middleware
+│   └── .env                     # Server environment variables
 │
 ├── test/
-│   └── validation.test.js       # Automated validation test suite
+│   └── validation.test.js       # Automated test suite (10 unit tests)
 │
-├── index.html                   # HTML entry point with Google Fonts
-├── vite.config.js               # Vite config with API proxy
-├── package.json                 # Project scripts & dependencies
-└── README.md
+├── index.html                   # Entry HTML file
+├── vite.config.js               # Vite build config with backend proxy setup
+├── package.json                 # Project dependencies & scripts
+└── README.md                    # Project documentation
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
-### 1. Clone Repository & Install Dependencies
+### 1. Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
 
+### 2. Clone Repository & Install Dependencies
 ```bash
 git clone https://github.com/Akash2004711/studyflow-ai.git
 cd studyflow-ai
 npm install
 ```
 
-### 2. Configure Environment Variables
-
-Create a `.env` file in the root or `server/` directory:
-
+### 3. Environment Configuration
+Create or edit `server/.env`:
 ```bash
 cp server/.env.example server/.env
 ```
 
-Edit `server/.env` and add your Google Gemini API key:
-
+Add your Google Gemini API key:
 ```env
-PORT=5000
-GEMINI_API_KEY=your_actual_gemini_api_key
+PORT=5001
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
+> 💡 **Tip**: Get a free API key at [Google AI Studio](https://aistudio.google.com/).
 
-> **Note**: Get a free API key at [Google AI Studio](https://aistudio.google.com/).
-
-### 3. Run Application
-
-To run both the Express backend and Vite frontend concurrently:
-
+### 4. Run Development Server
+Start both backend (Express) and frontend (Vite) concurrently with a single command:
 ```bash
 npm run dev
 ```
 
-- **Frontend**: `http://localhost:5173`
-- **Backend API**: `http://localhost:5000`
-- **Health Check**: `http://localhost:5000/api/health`
+- **Frontend Client**: `http://localhost:5173`
+- **Backend API**: `http://localhost:5001`
+- **Health Check**: `http://localhost:5001/api/health`
 
-Alternatively, you can run services separately:
-
-```bash
-# Terminal 1 - Backend Server
-npm run server
-
-# Terminal 2 - Frontend Client
-npm run client
-```
-
-### 4. Run Automated Tests
-
-To execute the test suite verifying schema validation and AI edge-case handling:
-
+### 5. Run Automated Tests
+Execute the automated validation and error-handling test suite:
 ```bash
 npm test
 ```
 
 ---
 
-## API Specification
+## 📡 API Specification
 
-### Generate Study Material
+### 1. Health Check
+- **Endpoint**: `GET /api/health`
+- **Response**: `200 OK`
+```json
+{
+  "status": "ok",
+  "geminiConfigured": true,
+  "timestamp": "2026-09-28T05:00:00.000Z"
+}
+```
 
+### 2. Generate Study Material
 - **Endpoint**: `POST /api/study/generate`
 - **Headers**: `Content-Type: application/json`
 
 #### Request Body
 ```json
 {
-  "input": "Explain JavaScript closures for a beginner"
+  "input": "Photosynthesis process in plants"
 }
 ```
 
@@ -209,74 +213,68 @@ npm test
 {
   "success": true,
   "data": {
-    "topic": "JavaScript Closures",
-    "summary": "A closure is the combination of a function bundled together with references to its surrounding state...",
+    "topic": "Photosynthesis",
+    "summary": "Photosynthesis is the biological process by which green plants convert light energy into chemical energy stored in glucose...",
     "flashcards": [
       {
         "id": "card-1",
-        "question": "What is a closure?",
-        "answer": "A closure is a function that remembers variables from its lexical scope even when executed outside that scope."
+        "question": "What are the primary reactants required for photosynthesis?",
+        "answer": "Carbon dioxide, water, and sunlight."
       }
     ],
     "quiz": [
       {
         "id": "question-1",
-        "question": "What does a closure allow a function to retain access to?",
+        "question": "Where specifically inside the chloroplast do light reactions occur?",
         "options": [
-          "Its outer lexical environment",
-          "A SQL database connection",
-          "Browser cookies",
-          "Hardware CPU registers"
+          "Thylakoid membranes",
+          "Stroma",
+          "Outer membrane",
+          "Matrix"
         ],
         "correctAnswer": 0,
-        "explanation": "Closures preserve references to outer scope variables across executions."
+        "explanation": "Light-dependent reactions take place within the thylakoid membranes where chlorophyll is housed."
       }
     ]
   }
 }
 ```
 
-#### Error Response (`400 / 502 / 503`)
+#### Error Response (`400 / 429 / 502 / 503`)
 ```json
 {
   "success": false,
   "error": {
-    "code": "AI_RESPONSE_INVALID",
-    "message": "The AI response did not match the required structured study format."
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "AI rate limit reached. Please wait a moment and try again."
   }
 }
 ```
 
 ---
 
-## AI Usage Note
+## ⌨️ Keyboard Shortcuts
 
-AI coding assistants were used for architectural brainstorming, drafting boilerplate schemas, reviewing edge cases, and accelerating CSS styling. The final implementation, component state flow, race-condition mitigation, and validation rules were reviewed and verified for correctness.
-
----
-
-## Known Limitations
-
-- **LLM Rate Limits**: Free tier Gemini API keys are subject to standard RPM (requests per minute) quotas. The app detects HTTP 429 status codes and displays a clear retry prompt.
-- **Session Persistence**: Currently, study sets exist in memory within the React lifecycle. Reloading the page resets the session.
+| Shortcut | Action | Scope |
+| :--- | :--- | :--- |
+| `Left Arrow (←)` | Navigate to previous flashcard | Flashcards Section |
+| `Right Arrow (→)` | Navigate to next flashcard | Flashcards Section |
+| `Click / Space` | Flip active flashcard | Active Flashcard |
 
 ---
 
-## Time Spent
+## 🧪 Error Handling & Standardized Codes
 
-- **Architecture & Schema Planning**: ~45 mins
-- **Backend API & Gemini Service**: ~1 hr
-- **Frontend Components & React State**: ~1.5 hrs
-- **Validation, Error & Stale Request Handling**: ~1 hr
-- **Styling, Polish & Testing**: ~1 hr
-- **Total Time**: ~5.25 hours
+| Error Code | HTTP Status | Description |
+| :--- | :---: | :--- |
+| `INVALID_INPUT` | `400` | Input is empty, missing, or exceeds maximum length. |
+| `RATE_LIMIT_EXCEEDED` | `429` | Gemini API rate quota reached. User prompted to retry. |
+| `AI_SERVICE_UNAVAILABLE` | `503` / `401` | Missing or unauthorized API key configuration. |
+| `AI_RESPONSE_MALFORMED` | `502` | AI returned unparseable JSON string. |
+| `AI_RESPONSE_INVALID` | `502` | AI output failed Zod schema structural validation. |
 
 ---
 
-## Future Improvements
+## 📝 License
 
-- Save sessions to browser `localStorage` or export to PDF / Anki decks
-- Streaming chunked responses for faster perceived TTFB
-- Difficulty toggles (Beginner / Intermediate / Advanced)
-- Keyboard shortcut overlays (`←` / `→` for cards, `1-4` for quiz choices)
-- Study streaks and mastery tracking across multiple study topics
+Distributed under the MIT License. See `LICENSE` for more details.
