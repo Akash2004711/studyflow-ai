@@ -61,6 +61,8 @@ const sanitizeJsonResponse = (rawText) => {
   return cleaned.trim();
 };
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function generateStudyMaterialFromAI(userInput) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -89,32 +91,51 @@ export async function generateStudyMaterialFromAI(userInput) {
   let lastError = null;
 
   for (const modelName of models) {
-    try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.3,
-        },
-      });
+    const maxRetries = 2;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.3,
+          },
+        });
 
-      const result = await model.generateContent(prompt);
-      rawResponseText = result.response.text();
-      if (rawResponseText) break;
-    } catch (err) {
-      lastError = err;
-      const msg = err?.message || '';
-      const isAuthError =
-        err.status === 401 ||
-        err.status === 403 ||
-        msg.includes('API_KEY_INVALID') ||
-        msg.includes('API key not valid') ||
-        msg.includes('invalid API key');
+        const result = await model.generateContent(prompt);
+        rawResponseText = result.response.text();
+        if (rawResponseText) break;
+      } catch (err) {
+        lastError = err;
+        const msg = err?.message || '';
+        const isAuthError =
+          err.status === 401 ||
+          err.status === 403 ||
+          msg.includes('API_KEY_INVALID') ||
+          msg.includes('API key not valid') ||
+          msg.includes('invalid API key');
 
-      if (isAuthError) {
+        if (isAuthError) {
+          break;
+        }
+
+        const isRateLimit =
+          err.status === 429 ||
+          msg.includes('429') ||
+          msg.includes('RESOURCE_EXHAUSTED') ||
+          msg.includes('Quota exceeded') ||
+          msg.includes('rate limit');
+
+        if (isRateLimit && attempt < maxRetries) {
+          console.warn(`[aiService] Rate limit hit on ${modelName} (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in 2.5s...`);
+          await delay(2500);
+          continue;
+        }
+
         break;
       }
     }
+    if (rawResponseText) break;
   }
 
   if (!rawResponseText) {
@@ -133,8 +154,20 @@ export async function generateStudyMaterialFromAI(userInput) {
         ErrorCodes.AI_SERVICE_UNAVAILABLE
       );
     }
-    if (lastError?.status === 429) {
-      throw new AppError('AI rate limit reached. Please wait a moment and try again.', 429, ErrorCodes.RATE_LIMIT_EXCEEDED);
+
+    const isRateLimit =
+      lastError?.status === 429 ||
+      msg.includes('429') ||
+      msg.includes('RESOURCE_EXHAUSTED') ||
+      msg.includes('Quota exceeded') ||
+      msg.includes('rate limit');
+
+    if (isRateLimit) {
+      throw new AppError(
+        'Gemini API rate limit reached (free tier quota). Please wait a few seconds and click "Try Again", or use a fresh free key from https://aistudio.google.com/.',
+        429,
+        ErrorCodes.RATE_LIMIT_EXCEEDED
+      );
     }
     throw new AppError(
       `Failed to communicate with AI service: ${lastError?.message || 'No response from model'}`,
