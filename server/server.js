@@ -3,11 +3,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import studyRoutes from './routes/study.js';
 import { formatErrorResponse } from './utils/errors.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, '../dist');
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -22,6 +24,10 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '1mb' }));
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -42,6 +48,22 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/study', studyRoutes);
+
+app.get('/', (req, res) => {
+  const indexPath = path.join(distPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.status(200).json({
+    status: 'online',
+    message: 'StudyFlow AI Backend Server is running.',
+    frontendUrl: 'http://localhost:5173',
+    healthCheck: '/api/health',
+    endpoints: {
+      generateStudyMaterial: 'POST /api/study/generate',
+    },
+  });
+});
 
 app.use((req, res) => {
   res.status(404).json({
