@@ -8,6 +8,8 @@ It transforms raw lecture notes, free-form text, or study topics into structured
 - 🧪 **5-Question Knowledge Quizzes** (with instant educational rationales)
 - 🎯 **Targeted Re-Test Mode** (isolates missed questions until 100% mastery)
 
+- Live project: https://studyflow-ai-lqcr.onrender.com/
+
 ---
 
 ## 🏗️ Architecture & Data Flow
