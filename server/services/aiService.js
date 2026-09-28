@@ -79,12 +79,10 @@ export async function generateStudyMaterialFromAI(userInput) {
   const prompt = `${SYSTEM_PROMPT}\n\nUSER STUDY INPUT / TOPIC:\n${userInput}`;
 
   const models = [
-    'gemini-3.8-flash',
     'gemini-2.5-flash',
-    'gemini-1.5-flash',
     'gemini-2.0-flash',
-    'gemini-flash-latest',
-    'gemini-pro-latest',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
   ];
 
   let rawResponseText = '';
@@ -135,6 +133,17 @@ export async function generateStudyMaterialFromAI(userInput) {
         break;
       }
     }
+
+    const msg = lastError?.message || '';
+    const isAuthError =
+      lastError?.status === 401 ||
+      lastError?.status === 403 ||
+      msg.includes('API_KEY_INVALID') ||
+      msg.includes('API key not valid') ||
+      msg.includes('invalid API key');
+
+    if (isAuthError) break;
+
     if (rawResponseText) break;
   }
 
